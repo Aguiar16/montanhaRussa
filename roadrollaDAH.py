@@ -1,6 +1,5 @@
 import random,string,random,time,threading,random,collections
 
-capacidade = 4
 npassageiros = 52
 fila = 0
 ncarros = 1
@@ -18,27 +17,39 @@ passId = 0
 sentados = threading.Semaphore(0)
 filaVazia = False
 
-class MontanhaRussa:
+class MontanhaRussa():
     def __init__(self,ncarros,npassageiros):
         self.mutex = threading.Lock()
         self.passageiros = npassageiros
         self.totalCarros = ncarros
         self.embarque = threading.Semaphore(0)
         self.carros = 0
-    
-    def criaCarros(totalCarros):
-        for i in totalCarros:
-            c = threading.Thread(target=Passageiro)
+        self.threads = []
+
+    def criaCarros(self):
+        for i in self.totalCarros:
+            c = threading.Thread(target=Carro.run(self.carros))
+            self.threads.append(c)
+
+    def criaPassageiro(self):
+        global fila
+        for i in self.passageiros:
+            c = threading.Thread(target=Passageiro(fila).run())
+            fila +=1
+            self.threads.append(c)
 
 
-class Passageiro():
-    def __init__ (self,id,chegada,embarque,desembarque):
+
+
+class Passageiro(object):
+    def __init__ (self,id):
         self.id = id
-        self.chegada = chegada
-        self.embarque = embarque
-        self.desembarque = desembarque
+        self.chegada = 0
+        self.embarque = 0
+        self.desembarque = 0
 
-    def board(self,fila):
+    def board(self):
+        global filaVazia
         sentado = False
         global passId
         while not sentado:
@@ -46,16 +57,21 @@ class Passageiro():
                 vaga.acquire()
                 print('Passageiro ', self.id,' entrando no carro')
                 sentado = True
-                passId+=1
-                if self.id%4 == 0:
+                if self.id == npassageiros-1:
+                    filaVazia = True
+                if (self.id)%4 == 0:
                     sentados.release()
-
+                passId+=1
 
     
-    def offboard(self):
+    def unboard(self):
         vaza.acquire()
-        print('Passageiro ', self.id,' saindo do carro')
+        print('Passageiro ', self.id,'esta saindo do carro')
         # time
+
+    def run(self):
+        self.board()
+        self.unboard()
         
 
     
@@ -70,7 +86,7 @@ class Carro():
 
     
 
-    def load(self,fila):
+    def load(self):
         self.ocupado.acquire()
         print("Carro ",self.nome,"pronto para o embarque de passageiros")
         if fila >= 3:
@@ -82,8 +98,19 @@ class Carro():
     
     def run(self):
         self.ocupado.acquire()
+        print("Carro ",self.nome,"esta em movimento.")
+        time.sleep(10)
+        self.ocupado.release()
+
+    def unload(self):
+        self.ocupado.acquire()
+        print("Carro ",self.nome,"chegou terminou o passeio.")
+        for i in range(self.capacidade):
+                vaza.release()
         
     
     def start (self):
-        # while self.ligado:
-        self.load(self.passageiros)
+        while not filaVazia:
+            self.load(self)
+            self.run(self)
+            self.unload(self)
