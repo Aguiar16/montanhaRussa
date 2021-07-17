@@ -1,21 +1,26 @@
 import random,string,random,time,threading,random,collections
 
 npassageiros = 52
-fila = 0
 ncarros = 1
 
-embarque = threading.Semaphore(0)
-notFull = threading.Semaphore(0)
 
-# Semaforos do carro p/ o passageiro
+
+
+# Semaforos/mutex do carro/passageiro
 vaga = threading.Semaphore(0)
 vaza = threading.Semaphore(0)
-
+mutex = threading.Lock() 
+embarque = threading.Semaphore(0)
+notFull = threading.Semaphore(0)
+# variavel para os carros
+temposC = []
+carrId = 0
 # variavel para os passageiros
-passId = 0
-
+passId = 1
+fila = 1
 sentados = threading.Semaphore(0)
 filaVazia = False
+temposP = []
 
 class MontanhaRussa():
     def __init__(self,ncarros,npassageiros):
@@ -23,42 +28,65 @@ class MontanhaRussa():
         self.passageiros = npassageiros
         self.totalCarros = ncarros
         self.embarque = threading.Semaphore(0)
-        self.carros = 0
-        self.threads = []
+        self.carros = 1
+        self.threadsC = []
+        self.threadsP = []
 
     def criaCarros(self):
         for i in self.totalCarros:
-            c = threading.Thread(target=Carro.run(self.carros))
-            self.threads.append(c)
+            c = threading.Thread(target=Carro(self.carros).start())
+            self.carros +=1
+            self.threadsC.append(c)
 
     def criaPassageiro(self):
         global fila
         for i in self.passageiros:
-            c = threading.Thread(target=Passageiro(fila).run())
+            c = threading.Thread(target=Passageiro(fila).start())
             fila +=1
-            self.threads.append(c)
+            self.threadsP.append(c)
 
+    def run(self):
+        self.criaCarros()
+        self.criaPassageiro()
+
+        for t in self.threadsC:
+            t.start()
+
+        for t in self.threadsP:
+            t.start()
+            zzz = random.choice([1,2,3])
+            time.sleep(zzz)
+        
+        for t in self.threadsC:
+            t.join()
+
+        for t in self.threadsP:
+            t.join()
 
 
 
 class Passageiro(object):
     def __init__ (self,id):
         self.id = id
-        self.chegada = 0
-        self.embarque = 0
-        self.desembarque = 0
+        self.nasceu = time.time()
 
     def board(self):
         global filaVazia
         sentado = False
         global passId
+        global tempos
+        global fila
         while not sentado:
             if self.id == passId:
                 vaga.acquire()
+                temposP.append((time.time()-self.nasceu))
                 print('Passageiro ', self.id,' entrando no carro')
                 sentado = True
-                if self.id == npassageiros-1:
+                if fila == 1:
                     filaVazia = True
+                elif fila != 1:
+                    fila -=1
+
                 if (self.id)%4 == 0:
                     sentados.release()
                 passId+=1
@@ -67,9 +95,8 @@ class Passageiro(object):
     def unboard(self):
         vaza.acquire()
         print('Passageiro ', self.id,'esta saindo do carro')
-        # time
 
-    def run(self):
+    def start(self):
         self.board()
         self.unboard()
         
@@ -80,21 +107,23 @@ class Carro():
     def __init__ (self,nome):
         self.capacidade = 4
         self.nome = nome
-        self.mutex = threading.Lock()
         self.ocupado = threading.Semaphore(0)
         self.ligado = True
-
-    
+        self.tTotal = time.time()
 
     def load(self):
         self.ocupado.acquire()
-        print("Carro ",self.nome,"pronto para o embarque de passageiros")
+        embarque.acquire()
+        print("Carro ",self.nome," pronto para o embarque de passageiros")
         if fila >= 3:
             for i in range(self.capacidade):
                 vaga.release()
             time.sleep(1)
             sentados.acquire()
+            embarque.release()
             self.ocupado.release()
+            
+
     
     def run(self):
         self.ocupado.acquire()
@@ -110,7 +139,13 @@ class Carro():
         
     
     def start (self):
+        global temposC
         while not filaVazia:
             self.load(self)
+            self.inicioCorrida = time.time()
             self.run(self)
+            self.tCorrida += time.time() - self.inicioCorrida
             self.unload(self)
+        self.tTotal = time.time - self.tTotal
+        with mutex:
+            temposC.append(self.tCorrida/self.tTotal)
