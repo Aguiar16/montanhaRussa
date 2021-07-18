@@ -1,10 +1,7 @@
-import random,string,random,time,threading,random,collections
+import random,random,time,threading,random,statistics
 
-npassageiros = 52
-ncarros = 1
-
-
-
+npassageiros = 0
+ncarros = 0
 
 # Semaforos/mutex do carro/passageiro
 vaga = threading.Semaphore(0)
@@ -14,7 +11,6 @@ embarque = threading.Semaphore(0)
 notFull = threading.Semaphore(0)
 # variavel para os carros
 temposC = []
-carrId = 0
 # variavel para os passageiros
 passId = 1
 fila = 1
@@ -23,19 +19,20 @@ filaVazia = False
 temposP = []
 
 class MontanhaRussa():
+
     def __init__(self,ncarros,npassageiros):
         self.mutex = threading.Lock()
         self.passageiros = npassageiros
         self.totalCarros = ncarros
         self.embarque = threading.Semaphore(0)
-        self.carros = 1
+        self.carrosId = 1
         self.threadsC = []
         self.threadsP = []
 
     def criaCarros(self):
         for i in self.totalCarros:
-            c = threading.Thread(target=Carro(self.carros).start())
-            self.carros +=1
+            c = threading.Thread(target=Carro(self.carrosId).start())
+            self.carrosId +=1
             self.threadsC.append(c)
 
     def criaPassageiro(self):
@@ -62,10 +59,15 @@ class MontanhaRussa():
 
         for t in self.threadsP:
             t.join()
+        
+        with open('statistics.txt','a') as output:
+            output.write("media de tempo na fila dos passageiros: ",statistics.mean(temposP))
+            output.write("maximo de tempo na fila dos passageiros: ",max(temposP))
+            output.write("minimo de tempo na fila dos passageiros: ",min(temposP))
+            output.write("taxa de utilização dos carros: ",temposC)
 
 
-
-class Passageiro(object):
+class Passageiro():
     def __init__ (self,id):
         self.id = id
         self.nasceu = time.time()
@@ -101,8 +103,6 @@ class Passageiro(object):
         self.unboard()
         
 
-    
-
 class Carro():
     def __init__ (self,nome):
         self.capacidade = 4
@@ -122,8 +122,6 @@ class Carro():
             sentados.acquire()
             embarque.release()
             self.ocupado.release()
-            
-
     
     def run(self):
         self.ocupado.acquire()
@@ -137,9 +135,9 @@ class Carro():
         for i in range(self.capacidade):
                 vaza.release()
         
-    
     def start (self):
         global temposC
+        global filaVazia
         while not filaVazia:
             self.load(self)
             self.inicioCorrida = time.time()
@@ -149,3 +147,23 @@ class Carro():
         self.tTotal = time.time - self.tTotal
         with mutex:
             temposC.append(self.tCorrida/self.tTotal)
+
+def main ():
+    global ncarros
+    global npassageiros
+    c = input('1 - 1 carro, 52 passageiros, 2- 2 carros e 92 passageiros, 3- 3 carros e 148 passageiros\n')
+    if c == 1:
+        ncarros = 1
+        npassageiros = 52
+        c = MontanhaRussa().run()
+    elif c == 2:
+        ncarros = 2
+        npassageiros = 92
+        c = MontanhaRussa().run()
+    elif c == 3:
+        ncarros = 3
+        npassageiros = 148
+        c = MontanhaRussa().run()
+
+if __name__ == "__main__":
+    main()
