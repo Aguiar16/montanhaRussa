@@ -12,3 +12,8 @@ media de tempo na fila dos passageiros: 4.666073212752471
 maximo de tempo na fila dos passageiros: 9.246257781982422
 minimo de tempo na fila dos passageiros: 3.029500722885132
 taxa de utilizaÃ§Ã£o dos carros: [0.397467387273648, 0.39102518608799997, 0.4113896540036382]
+
+media de tempo na fila dos passageiros: 88.79211899867424
+maximo de tempo na fila dos passageiros: 164.6095530986786
+minimo de tempo na fila dos passageiros: 3.100877046585083
+taxa de utilização dos carros: [0.4442635159751707]
