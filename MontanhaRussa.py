@@ -1,4 +1,4 @@
-import random,random,time,threading,random,statistics
+import random,time,threading,statistics
 
 npassageiros = 0
 ncarros = 0
@@ -10,7 +10,7 @@ mutex = threading.Lock()
 embarque = threading.Semaphore(1)
 
 # variavel para os carros
-temposC = []
+temposC = [] # vetor para o tempo dos Carros
 # variavel para os passageiros
 passId = 1
 fila = 0
@@ -159,6 +159,7 @@ class Carro:
         print(f"\nCarro {self.nome} esta sendo desligado.\n")
         self.tTotal = time.time() - self.tTotal
         with mutex:
+            temposC.append(f"Carro {self.nome}:")
             temposC.append(self.tCorrida/self.tTotal)
 
 def main ():
