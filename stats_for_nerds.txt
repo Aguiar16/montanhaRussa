@@ -1,0 +1,20 @@
+Taxa de utilizacao dos carros: [0.4195078136721198]
+Tempo medio dos passageiros na fila: 97.11188376408357
+
+Tempo minimo de espera dos passageiros na fila: 3.1021642684936523
+Tempo maximo de espera dos passageiros na fila: 180.1366364955902
+Taxa de utilizacao dos carros: [0.041101776360247214, 0.04202589035587066, 0.04524914164954741]
+Tempo medio dos passageiros na fila: 4.7634359872018965
+
+Tempo minimo de espera dos passageiros na fila: 3.068232536315918
+Tempo maximo de espera dos passageiros na fila: 9.361087799072266
+Taxa de utilizacao dos carros: [0.09357768326793015]
+Tempo medio dos passageiros na fila: 18.170697560677162
+
+Tempo minimo de espera dos passageiros na fila: 3.1205055713653564
+Tempo maximo de espera dos passageiros na fila: 39.14548349380493
+Taxa de utilizacao dos carros: [0.040058904984549004, 0.039565812342302026, 0.04173337121673317]
+Tempo medio dos passageiros na fila: 4.904737580466914
+
+Tempo minimo de espera dos passageiros na fila: 3.0372138023376465
+Tempo maximo de espera dos passageiros na fila: 9.416110754013062
